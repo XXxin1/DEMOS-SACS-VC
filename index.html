@@ -1,0 +1,655 @@
+
+<!DOCTYPE html> 
+<html> 
+<head> 
+     <title>SACS-VC Demo</title>
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.1/css/bootstrap.min.css" integrity="sha384-VCmXjywReHh4PwowAiWNagnWcLhlEJLA5buUprzK8rxFgeH0kww/aWY76TfkUoSX" crossorigin="anonymous">
+<link rel="stylesheet" href="style.css">
+</head> 
+<body> 
+
+<div class="jumbotron bg-light">
+    <div class="container">
+        <h1 class="display-5">SACS-VC Voise Conversion Demos</h1>
+        <p class="lead">Any-to-Any Voice Conversion with Multi-layer Style Adaptation and Content Supervision</p>
+        <hr class="my-6">
+        <p>
+            <b>Abstract:</b>
+                Any-to-any voice conversion can perform among arbitrary speakers with even just  one single reference utterance. 
+ Many related studies have demonstrated that it can be effectively implemented by speech representation disentanglement.
+ On the one hand,  most existing solutions fuse the style representations into the content features in a global manner without considering the difference of distributions between them.
+ On the other hand, in the  any-to-any scenario, there is no effective method to ensure the consistency of the linguistic content without text transcription and additional information extracted from additional modules.
+ To alleviate the above problems, in this paper, we propose a novel any-to-any voice conversion method, which we refer to as  SACS-VC.
+	It combines two principal modules, which are a)  Style Adaptation and b) Content Supervision.
+ Specifically, we rearrange the style representations according to the content distribution by using a temporal attention mechanism, to obtain  finer-grained style timbre information for each individual content feature.
+ Meanwhile, we associate the converted outputs and the source utterances directly to supervise the consistency of semantic content in an unsupervised manner.
+ This  can be achieved using  contrastive learning based on the corresponding and the non-corresponding locations of content features.
+ Additionally, our method can implement by using a  non-parallel speech corpus without any pretraining.
+ Experimental results demonstrate that our method outperforms the current state-of-the-art any-to-any voice conversion systems in both objective and subjective evaluation settings.
+        </p>
+    </div>
+</div>
+<div class="container">
+    <h3>MANY-TO-MANY VOICE CONVERSION</h3>
+    <p class="lead">All speakers are seen, but utterances are not seen during training</p>    
+        <div class="card-header text-white bg-secondary">Transcription: They do not work for Glasgow City Council.</div>
+            <table class="table table-responsive align-content-center"  style="border: 0cm;">
+                <tr> 
+                    <td rowspan="3" style="vertical-align: top;">
+                        <p>Source Speech (Female)</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/f2f/p249_079_p236_253/vocoder_source_p249_079.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td rowspan="3" style="vertical-align: top">
+                        <p>Reference Speech (Female)</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/f2f/p249_079_p236_253/vocoder_target_p236_253.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td style="vertical-align: top">
+                        <p>AdaIN-VC</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/f2f/p249_079_p236_253/converted_adainvc.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p>AGAIN-VC</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/f2f/p249_079_p236_253/converted_againvc.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p>VQVC+</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/f2f/p249_079_p236_253/converted_vqvc+.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td style="vertical-align: top">
+                        <p>AUTOVC</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/f2f/p249_079_p236_253/converted_autovc.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p><i>remove_cs</i></p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/f2f/p249_079_p236_253/converted_removecs.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p><i><b>SACS-VC (Ours)</b></i></p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/f2f/p249_079_p236_253/converted_proposed.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td>
+                </tr>
+            </table> 
+
+            <div class="card-header text-white bg-secondary">Transcription: In fact, I have been a bit of a terrorist to the council.</div>
+            <table class="table table-responsive align-content-center"  style="border: 0cm;">
+                <tr> 
+                    <td rowspan="3" style="vertical-align: top;">
+                        <p>Source Speech (Female)</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/f2m/p280_286_p270_245/vocoder_source_p280_286.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td rowspan="3" style="vertical-align: top">
+                        <p>Reference Speech (Male)</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/f2m/p280_286_p270_245/vocoder_target_p270_245.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td style="vertical-align: top">
+                        <p>AdaIN-VC</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/f2m/p280_286_p270_245/converted_adainvc.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p>AGAIN-VC</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/f2m/p280_286_p270_245/converted_againvc.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p>VQVC+</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/f2m/p280_286_p270_245/converted_vqvc+.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td style="vertical-align: top">
+                        <p>AUTOVC</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/f2m/p280_286_p270_245/converted_autovc.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p><i>remove_cs</i></p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/f2m/p280_286_p270_245/converted_removecs.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p><i><b>SACS-VC (Ours)</b></i></p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/f2m/p280_286_p270_245/converted_proposed.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td>
+                </tr>
+            </table> 
+
+            <div class="card-header text-white bg-secondary">Transcription: The Greeks used to imagine that it was a sign from the gods to foretell war or heavy rain.</div>
+            <table class="table table-responsive align-content-center"  style="border: 0cm;">
+                <tr> 
+                    <td rowspan="3" style="vertical-align: top;">
+                        <p>Source Speech (Male)</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/m2f/p284_015_p318_340/vocoder_source_p284_015.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td rowspan="3" style="vertical-align: top">
+                        <p>Reference Speech (FeMale)</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/m2f/p284_015_p318_340/vocoder_target_p318_340.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td style="vertical-align: top">
+                        <p>AdaIN-VC</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/m2f/p284_015_p318_340/converted_adainvc.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p>AGAIN-VC</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/m2f/p284_015_p318_340/converted_againvc.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p>VQVC+</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/m2f/p284_015_p318_340/converted_vqvc+.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td style="vertical-align: top">
+                        <p>AUTOVC</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/m2f/p284_015_p318_340/converted_autovc.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p><i>remove_cs</i></p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/m2f/p284_015_p318_340/converted_removecs.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p><i><b>SACS-VC (Ours)</b></i></p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/m2f/p284_015_p318_340/converted_proposed.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td>
+                </tr>
+            </table> 
+
+            <div class="card-header text-white bg-secondary">Transcription: If only the acting profession was that simple.</div>
+            <table class="table table-responsive align-content-center"  style="border: 0cm;">
+                <tr> 
+                    <td rowspan="3" style="vertical-align: top;">
+                        <p>Source Speech (Male)</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/m2m/p292_156_p232_016/vocoder_source_p292_156.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td rowspan="3" style="vertical-align: top">
+                        <p>Reference Speech (Male)</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/m2m/p292_156_p232_016/vocoder_target_p232_016.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td style="vertical-align: top">
+                        <p>AdaIN-VC</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/m2m/p292_156_p232_016/converted_adainvc.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p>AGAIN-VC</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/m2m/p292_156_p232_016/converted_againvc.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p>VQVC+</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/m2m/p292_156_p232_016/converted_vqvc+.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td style="vertical-align: top">
+                        <p>AUTOVC</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/m2m/p292_156_p232_016/converted_autovc.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p><i>remove_cs</i></p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/m2m/p292_156_p232_016/converted_removecs.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p><i><b>SACS-VC (Ours)</b></i></p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/m2m/m2m/p292_156_p232_016/converted_proposed.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td>
+                </tr>
+            </table> 
+            <br></br>
+
+            <h3>ANY-TO-ANY VOICE CONVERSION</h3>
+            <p class="lead">All speakers are not seen during training</p>    
+            <div class="card-header bg-secondary text-white">Transcription: Other casualties were averted by the swift response of the emergency services.</div>
+            <table class="table table-responsive align-content-center"  style="border: 0cm;">
+                <tr> 
+                    <td rowspan="3" style="vertical-align: top;">
+                        <p>Source Speech (Female)</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/f2f/p239_489_p257_407/vocoder_source_p239_489.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td rowspan="3" style="vertical-align: top">
+                        <p>Reference Speech (Female)</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/f2f/p239_489_p257_407/vocoder_target_p257_407.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td style="vertical-align: top">
+                        <p>AdaIN-VC</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/f2f/p239_489_p257_407/converted_adainvc.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p>AGAIN-VC</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/f2f/p239_489_p257_407/converted_againvc.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p>VQVC+</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/f2f/p239_489_p257_407/converted_vqvc+.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td style="vertical-align: top">
+                        <p>AUTOVC</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/f2f/p239_489_p257_407/converted_autovc.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p><i>remove_cs</i></p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/f2f/p239_489_p257_407/converted_removecs.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p><i><b>SACS-VC (Ours)</b></i></p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/f2f/p239_489_p257_407/converted_proposed.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td>
+                </tr>
+            </table> 
+
+            <div class="card-header bg-secondary text-white">Transcription: The response from everyone was wonderful.</div>
+            <table class="table table-responsive align-content-center"  style="border: 0cm;">
+                <tr> 
+                    <td rowspan="3" style="vertical-align: top;">
+                        <p>Source Speech (Female)</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/f2m/p239_473_p345_115/vocoder_source_p239_473.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td rowspan="3" style="vertical-align: top">
+                        <p>Reference Speech (Male)</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/f2m/p239_473_p345_115/vocoder_target_p345_115.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td style="vertical-align: top">
+                        <p>AdaIN-VC</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/f2m/p239_473_p345_115/converted_adainvc.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p>AGAIN-VC</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/f2m/p239_473_p345_115/converted_againvc.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p>VQVC+</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/f2m/p239_473_p345_115/converted_vqvc+.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td style="vertical-align: top">
+                        <p>AUTOVC</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/f2m/p239_473_p345_115/converted_autovc.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p><i>remove_cs</i></p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/f2m/p239_473_p345_115/converted_removecs.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p><i><b>SACS-VC (Ours)</b></i></p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/f2m/p239_473_p345_115/converted_proposed.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td>
+                </tr>
+            </table> 
+
+            <div class="card-header bg-secondary text-white">Transcription: Six spoons of fresh snow peas, five thick slabs of blue cheese, and maybe a snack for her brother Bob.</div>
+            <table class="table table-responsive align-content-center"  style="border: 0cm;">
+                <tr> 
+                    <td rowspan="3" style="vertical-align: top;">
+                        <p>Source Speech (Male)</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/m2f/p271_003_p295_034/vocoder_source_p271_003.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td rowspan="3" style="vertical-align: top">
+                        <p>Reference Speech (Female)</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/m2f/p271_003_p295_034/vocoder_target_p295_034.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td style="vertical-align: top">
+                        <p>AdaIN-VC</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/m2f/p271_003_p295_034/converted_adainvc.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p>AGAIN-VC</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/m2f/p271_003_p295_034/converted_againvc.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p>VQVC+</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/m2f/p271_003_p295_034/converted_vqvc+.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td style="vertical-align: top">
+                        <p>AUTOVC</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/m2f/p271_003_p295_034/converted_autovc.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p><i>remove_cs</i></p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/m2f/p271_003_p295_034/converted_removecs.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p><i><b>SACS-VC (Ours)</b></i></p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/m2f/p271_003_p295_034/converted_proposed.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td>
+                </tr>
+            </table> 
+            <div class="card-header bg-secondary text-white">Transcription: Health Secretary Frank Dobson made the surprise announcement in the Commons yesterday.</div>
+            <table class="table table-responsive align-content-center"  style="border: 0cm;">
+                <tr> 
+                    <td rowspan="3" style="vertical-align: top;">
+                        <p>Source Speech (Male)</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/m2m/p271_112_p345_261/vocoder_source_p271_112.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td rowspan="3" style="vertical-align: top">
+                        <p>Reference Speech (Male)</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/m2m/p271_112_p345_261/vocoder_target_p345_261.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td style="vertical-align: top">
+                        <p>AdaIN-VC</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/m2m/p271_112_p345_261/converted_adainvc.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p>AGAIN-VC</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/m2m/p271_112_p345_261/converted_againvc.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p>VQVC+</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/m2m/p271_112_p345_261/converted_vqvc+.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td style="vertical-align: top">
+                        <p>AUTOVC</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/m2m/p271_112_p345_261/converted_autovc.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p><i>remove_cs</i></p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/m2m/p271_112_p345_261/converted_removecs.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p><i><b>SACS-VC (Ours)</b></i></p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/a2a/m2m/p271_112_p345_261/converted_proposed.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td>
+                </tr>
+            </table> 
+
+            <br></br>
+
+            <h3>ABLATION STUDIES (ANY-TO-ANY)</h3>
+            <p class="lead">All speakers are not seen during training</p> 
+            <div class="card-header bg-secondary text-white">Transcription: I think the Commission has been very, very slow to react.</div>
+            <table class="table table-responsive align-content-center"  style="border: 0cm;">
+                <tr> 
+                    <td rowspan="2" style="vertical-align: top;">
+                        <p>Source Speech (Male)</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/ablation_studies/p245_172_p295_102/vocoder_source_p245_172.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td rowspan="2" style="vertical-align: top">
+                        <p>Reference Speech (Female)</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/ablation_studies/p245_172_p295_102/vocoder_target_p295_102.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td style="vertical-align: top">
+                        <p><i>remove_contrast</i></p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/ablation_studies/p245_172_p295_102/converted_removecontrast.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p><i>remove_content</i></p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/ablation_studies/p245_172_p295_102/converted_removecontent.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td style="vertical-align: top">
+                        <p><i>remove_cs</i></p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/ablation_studies/p245_172_p295_102/converted_removecs.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p><i><b>SACS-VC (Ours)</b></i></p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/ablation_studies/p245_172_p295_102/converted_proposed.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="card-header bg-secondary text-white">Transcription: There is no point in looking any further.</div>
+            <table class="table table-responsive align-content-center"  style="border: 0cm;">
+                <tr> 
+                    <td rowspan="2" style="vertical-align: top;">
+                        <p>Source Speech (Female)</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/ablation_studies/p295_375_p239_028/vocoder_source_p295_375.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td rowspan="2" style="vertical-align: top">
+                        <p>Reference Speech (Female)</p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/ablation_studies/p295_375_p239_028/vocoder_target_p239_028.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td style="vertical-align: top">
+                        <p><i>remove_contrast</i></p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/ablation_studies/p295_375_p239_028/converted_removecontrast.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p><i>remove_content</i></p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/ablation_studies/p295_375_p239_028/converted_removecontent.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td> 
+                    <td style="vertical-align: top">
+                        <p><i>remove_cs</i></p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/ablation_studies/p295_375_p239_028/converted_removecs.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                        <p><i><b>SACS-VC (Ours)</b></i></p>
+                        <p>
+                            <audio id="player" controls>
+                                <source src="Demos/ablation_studies/p295_375_p239_028/converted_proposed.wav" type="audio/wav" />
+                            </audio>
+                        </p>
+                    </td>
+                </tr>
+            </table>
+
+        <br></br>
+
+        <h5>The VC methods compared in the paper are as follows: </h5>
+        <ul>
+            <li><a href="https://github.com/jjery2243542/adaptive_voice_conversion">AdaIN-VC</a>: One-shot Voice Conversion by Separating Speaker and Content Representations with Instance Normalization </li>
+            <li><a href="https://github.com/KimythAnly/AGAIN-VC">AGAIN-VC</a>: A One-shot Voice Conversion using Activation Guidance and Adaptive Instance Normalization </li>
+            <li><a href="https://github.com/ericwudayi/SkipVQVC">VQVC+</a>: One-Shot Voice Conversion by Vector Quantization and U-Net architecture </li>
+            <li><a href="https://github.com/auspicious3000/autovc">AUTOVC</a>: Zero-Shot Voice Style Transfer with Only Autoencoder Loss </li>
+        </ul>
+        
+</div>
+     
+
+<div class="container" style="padding-top: 60px;">
+    <p class="text-center text-muted">&copy; XXxin1</p>
+</div>
+</body> 
+</html>
